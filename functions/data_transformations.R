@@ -29,12 +29,29 @@ transform_metadata_to_df<-  function(stations_metadata) {
 
 
 
-to_iso8601<- function(){
-  
+to_iso8601 <- function(datetime, offset_days = 0) {
+  iso_time <- as.character(datetime + days(offset_days))
+  formatted_iso_time <- iso8601(anytime(iso_time))
+  return(formatted_iso_time)
 }
 
 
+transform_volumes<- function(json_response) {
 
-
-
+  # Parse the JSON data
+  data <- fromJSON(json_response, simplifyDataFrame = TRUE)
+  
+  # Check if the data contains the 'volume' field
+  if (!"volume" %in% colnames(data)) {
+    stop("JSON data does not contain 'volume' field.")
+  }
+  
+  # Extract relevant data and convert to a data frame
+  volumes_df <- data %>%
+    select(node.hour, node.volume) %>%
+    rename(hour = node.hour, volume = node.volume) %>%
+    as.data.frame()
+  
+  return(volumes_df)
+}
 
